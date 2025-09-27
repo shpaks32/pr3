@@ -31,13 +31,13 @@ function renderHPLife (person) {
 
 function renderProgressbarHP (person) {
   person.elProgressbar.style.width = person.damageHP + '%'
-  if (person.damageHP > 60) {
-    person.elProgressbar.style.background = '#4CAF50'
-  } else if (person.damageHP > 30) {
-    person.elProgressbar.style.background = '#FF9800'
-  } else {
-    person.elProgressbar.style.background = '#F44336'
-  }
+
+  const percent = person.damageHP / 100
+  const r = Math.floor(255 * (1 - percent))
+  const g = Math.floor(255 * percent)
+  const b = 0
+
+  person.elProgressbar.style.background = `rgb(${r},${g},${b})`
 }
 
 function renderHP (person) {
@@ -45,12 +45,23 @@ function renderHP (person) {
   renderProgressbarHP(person)
 }
 
+function showMessage (text) {
+  const msg = document.createElement('div')
+  msg.className = 'battle-message'
+  msg.textContent = text
+  document.body.appendChild(msg)
+
+  setTimeout(() => {
+    msg.remove()
+  }, 3000)
+}
+
 function changeHP (count, person) {
   if (person.damageHP <= count) {
     person.damageHP = 0
     renderHP(person)
     if (!person.lost) {
-      alert('Бідний ' + person.name + ' програв бій!')
+      showMessage('⚡ ' + person.name + ' вибув з бою!')
       person.lost = true
     }
   } else {
@@ -68,19 +79,16 @@ function attack (person, maxDamage) {
 }
 
 $btnKick.addEventListener('click', function () {
-  console.log('Thunder Jolt!')
   attack(enemy1, 20)
   attack(enemy2, 20)
 })
 
 $btnQuick.addEventListener('click', function () {
-  console.log('Quick Attack!')
   attack(enemy1, 10)
   attack(enemy2, 10)
 })
 
 function init () {
-  console.log('Start Game!')
   renderHP(character)
   renderHP(enemy1)
   renderHP(enemy2)
