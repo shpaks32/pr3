@@ -1,50 +1,6 @@
 const $btnKick = document.getElementById('btn-kick')
 const $btnQuick = document.getElementById('btn-quick')
 
-const character = {
-  name: 'Pikachu',
-  defaultHP: 100,
-  damageHP: 100,
-  elHP: document.getElementById('health-character'),
-  elProgressbar: document.getElementById('progressbar-character')
-}
-
-const enemy1 = {
-  name: 'Charmander',
-  defaultHP: 100,
-  damageHP: 100,
-  elHP: document.getElementById('health-enemy1'),
-  elProgressbar: document.getElementById('progressbar-enemy1')
-}
-
-const enemy2 = {
-  name: 'Bulbasaur',
-  defaultHP: 100,
-  damageHP: 100,
-  elHP: document.getElementById('health-enemy2'),
-  elProgressbar: document.getElementById('progressbar-enemy2')
-}
-
-function renderHPLife (person) {
-  person.elHP.innerText = person.damageHP + ' / ' + person.defaultHP
-}
-
-function renderProgressbarHP (person) {
-  person.elProgressbar.style.width = person.damageHP + '%'
-
-  const percent = person.damageHP / 100
-  const r = Math.floor(255 * (1 - percent))
-  const g = Math.floor(255 * percent)
-  const b = 0
-
-  person.elProgressbar.style.background = `rgb(${r},${g},${b})`
-}
-
-function renderHP (person) {
-  renderHPLife(person)
-  renderProgressbarHP(person)
-}
-
 function showMessage (text) {
   const msg = document.createElement('div')
   msg.className = 'battle-message'
@@ -56,18 +12,72 @@ function showMessage (text) {
   }, 3000)
 }
 
-function changeHP (count, person) {
-  if (person.damageHP <= count) {
-    person.damageHP = 0
-    renderHP(person)
-    if (!person.lost) {
-      showMessage('⚡ ' + person.name + ' вибув з бою!')
-      person.lost = true
+const character = {
+  name: 'Pikachu',
+  defaultHP: 100,
+  damageHP: 100,
+  elHP: document.getElementById('health-character'),
+  elProgressbar: document.getElementById('progressbar-character'),
+
+  renderHPLife () {
+    this.elHP.innerText = this.damageHP + ' / ' + this.defaultHP
+  },
+
+  renderProgressbarHP () {
+    this.elProgressbar.style.width = this.damageHP + '%'
+
+    const percent = this.damageHP / 100
+    const r = Math.floor(255 * (1 - percent))
+    const g = Math.floor(255 * percent)
+    const b = 0
+
+    this.elProgressbar.style.background = `rgb(${r},${g},${b})`
+  },
+
+  renderHP () {
+    this.renderHPLife()
+    this.renderProgressbarHP()
+  },
+
+  changeHP (count) {
+    if (this.damageHP <= count) {
+      this.damageHP = 0
+      this.renderHP()
+      if (!this.lost) {
+        showMessage('⚡ ' + this.name + ' вибув з бою!')
+        this.lost = true
+      }
+    } else {
+      this.damageHP -= count
+      this.renderHP()
     }
-  } else {
-    person.damageHP -= count
-    renderHP(person)
   }
+}
+
+const enemy1 = {
+  name: 'Charmander',
+  defaultHP: 100,
+  damageHP: 100,
+  elHP: document.getElementById('health-enemy1'),
+  elProgressbar: document.getElementById('progressbar-enemy1'),
+
+  renderHPLife: character.renderHPLife,
+  renderProgressbarHP: character.renderProgressbarHP,
+  renderHP: character.renderHP,
+  changeHP: character.changeHP
+}
+
+const enemy2 = {
+  name: 'Bulbasaur',
+  defaultHP: 100,
+  damageHP: 100,
+  elHP: document.getElementById('health-enemy2'),
+  elProgressbar: document.getElementById('progressbar-enemy2'),
+
+  renderHPLife: character.renderHPLife,
+  renderProgressbarHP: character.renderProgressbarHP,
+  renderHP: character.renderHP,
+  changeHP: character.changeHP
 }
 
 function random (num) {
@@ -75,7 +85,7 @@ function random (num) {
 }
 
 function attack (person, maxDamage) {
-  changeHP(random(maxDamage), person)
+  person.changeHP(random(maxDamage))
 }
 
 $btnKick.addEventListener('click', function () {
@@ -89,9 +99,9 @@ $btnQuick.addEventListener('click', function () {
 })
 
 function init () {
-  renderHP(character)
-  renderHP(enemy1)
-  renderHP(enemy2)
+  character.renderHP()
+  enemy1.renderHP()
+  enemy2.renderHP()
 }
 
 init()
