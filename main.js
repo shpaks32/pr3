@@ -17,7 +17,6 @@ function random (num) {
 function generateLog (firstPerson, secondPerson, damage, hpLeft, hpTotal) {
   const { name: name1 } = firstPerson
   const { name: name2 } = secondPerson
-
   const logs = [
     `${name1} вагався, але ${name2} не зволікав і вдарив!`,
     `${name1} зробив помилку, а ${name2} скористався моментом.`,
@@ -30,9 +29,8 @@ function generateLog (firstPerson, secondPerson, damage, hpLeft, hpTotal) {
     `${name1} втратив рівновагу, і ${name2} атакував!`,
     `${name1} не очікував — ${name2} ударив раптово.`
   ]
-
   const text = logs[random(logs.length) - 1]
-  return `${text} -${damage} HP [${hpLeft}/${hpTotal}]`
+  return `${text}  -${damage} HP [${hpLeft}/${hpTotal}]`
 }
 
 function renderLog (text) {
@@ -44,7 +42,6 @@ function renderLog (text) {
 function createPlayer ({ name, id }) {
   const elHP = document.getElementById(`health-${id}`)
   const elProgressbar = document.getElementById(`progressbar-${id}`)
-
   const player = {
     name,
     defaultHP: 100,
@@ -52,43 +49,44 @@ function createPlayer ({ name, id }) {
     lost: false,
     elHP,
     elProgressbar,
-
     renderHPLife () {
-      const { damageHP, defaultHP, elHP } = this
-      elHP.innerText = `${damageHP} / ${defaultHP}`
+      this.elHP.innerText = `${this.damageHP} / ${this.defaultHP}`
     },
-
     renderProgressbarHP () {
-      const { damageHP, elProgressbar } = this
-      elProgressbar.style.width = `${damageHP}%`
-      elProgressbar.style.background =
-        damageHP > 60 ? '#4CAF50' : damageHP > 30 ? '#FF9800' : '#F44336'
+      this.elProgressbar.style.width = `${this.damageHP}%`
+      this.elProgressbar.style.background =
+        this.damageHP > 60
+          ? '#4CAF50'
+          : this.damageHP > 30
+          ? '#FF9800'
+          : '#F44336'
     },
-
     renderHP () {
       this.renderHPLife()
       this.renderProgressbarHP()
     },
-
     changeHP (count, enemy) {
-      const { name, defaultHP } = this
-
       if (this.damageHP <= count) {
         this.damageHP = 0
         this.renderHP()
         if (!this.lost) {
-          showMessage(`${name} вибув з бою`)
+          showMessage(`${this.name} вибув з бою!`)
           this.lost = true
         }
       } else {
         this.damageHP -= count
         this.renderHP()
-        const log = generateLog(enemy, this, count, this.damageHP, defaultHP)
+        const log = generateLog(
+          enemy,
+          this,
+          count,
+          this.damageHP,
+          this.defaultHP
+        )
         renderLog(log)
       }
     }
   }
-
   return player
 }
 
@@ -101,22 +99,51 @@ function attack (attacker, defender, maxDamage) {
   defender.changeHP(damage, attacker)
 }
 
+const createClickCounter = (button, maxClicks) => {
+  let clicks = 0
+  const originalText = button.innerText
+  return () => {
+    if (clicks < maxClicks) {
+      clicks++
+      const remaining = maxClicks - clicks
+      console.log(`Кнопка "${originalText}": натискань ${clicks}/${maxClicks}`)
+      button.innerText = `${originalText} (${remaining} залишилось)`
+      if (clicks === maxClicks) {
+        button.disabled = true
+        button.style.opacity = '0.6'
+        button.innerText = `${originalText} (0 залишилось)`
+        console.log(`Кнопка "${originalText}" більше не активна`)
+      }
+      return true
+    }
+    return false
+  }
+}
+
+const kickCounter = createClickCounter($btnKick, 7)
+const quickCounter = createClickCounter($btnQuick, 7)
+
 $btnKick.addEventListener('click', () => {
-  showMessage('Thunder Jolt!')
-  attack(character, enemy1, 20)
-  attack(character, enemy2, 20)
+  if (kickCounter()) {
+    showMessage('Thunder Jolt!')
+    attack(character, enemy1, 20)
+    attack(character, enemy2, 20)
+  }
 })
 
 $btnQuick.addEventListener('click', () => {
-  showMessage('Quick Attack!')
-  attack(character, enemy1, 10)
-  attack(character, enemy2, 10)
+  if (quickCounter()) {
+    showMessage('Quick Attack!')
+    attack(character, enemy1, 10)
+    attack(character, enemy2, 10)
+  }
 })
 
 function init () {
   character.renderHP()
   enemy1.renderHP()
   enemy2.renderHP()
+  console.log('Start Game!')
 }
 
 init()
