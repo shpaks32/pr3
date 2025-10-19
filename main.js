@@ -7,7 +7,6 @@ function showMessage (text) {
   msg.className = 'battle-message'
   msg.textContent = text
   document.body.appendChild(msg)
-
   setTimeout(() => msg.remove(), 3000)
 }
 
@@ -33,7 +32,7 @@ function generateLog (firstPerson, secondPerson, damage, hpLeft, hpTotal) {
   ]
 
   const text = logs[random(logs.length) - 1]
-  return `${text}  -${damage} HP [${hpLeft}/${hpTotal}]`
+  return `${text} -${damage} HP [${hpLeft}/${hpTotal}]`
 }
 
 function renderLog (text) {
@@ -78,13 +77,12 @@ function createPlayer ({ name, id }) {
         this.damageHP = 0
         this.renderHP()
         if (!this.lost) {
-          showMessage(`⚡ ${name} вибув з бою!`)
+          showMessage(`${name} вибув з бою`)
           this.lost = true
         }
       } else {
         this.damageHP -= count
         this.renderHP()
-
         const log = generateLog(enemy, this, count, this.damageHP, defaultHP)
         renderLog(log)
       }
@@ -104,13 +102,13 @@ function attack (attacker, defender, maxDamage) {
 }
 
 $btnKick.addEventListener('click', () => {
-  showMessage('⚡ Thunder Jolt!')
+  showMessage('Thunder Jolt!')
   attack(character, enemy1, 20)
   attack(character, enemy2, 20)
 })
 
 $btnQuick.addEventListener('click', () => {
-  showMessage('💨 Quick Attack!')
+  showMessage('Quick Attack!')
   attack(character, enemy1, 10)
   attack(character, enemy2, 10)
 })
